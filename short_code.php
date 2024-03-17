@@ -32,10 +32,12 @@ function array_any(array $array, callable $fn) {
 
 function displayKaarten($domain, $id) {
 
+  $timezone = new DateTimeZone('Europe/Amsterdam');
+
   $dateFtm = new IntlDateFormatter('nl_NL', IntlDateFormatter::FULL, IntlDateFormatter::NONE);
   $dateFtm->setPattern('EEEE d MMMM yyyy');
 
-  $timeFtm = new IntlDateFormatter('nl_NL', IntlDateFormatter::NONE, IntlDateFormatter::FULL);
+  $timeFtm = new IntlDateFormatter('nl_NL', IntlDateFormatter::NONE, IntlDateFormatter::FULL, "Europe/Amsterdam");
   $timeFtm->setPattern('HH:mm');
 
 
@@ -100,8 +102,8 @@ function displayKaarten($domain, $id) {
       </thead>
       <tbody>
         <?php foreach ($voorstelling->uitvoeringen as $uitvoering) { 
-          $aanvang = date_create($uitvoering->aanvang);
-          $deur_open = date_create($uitvoering->deur_open);
+          $aanvang = date_create($uitvoering->aanvang,  $timezone);
+          $deur_open = date_create($uitvoering->deur_open, $timezone);
           ?>
         <tr>
           <td>
