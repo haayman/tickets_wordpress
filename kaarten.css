@@ -1,0 +1,21 @@
+.kaarten.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  word-wrap: break-word;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-radius: 0.25rem;
+}
+
+.kaarten label {
+  min-width: 10em;
+}
+
+.kaarten .row {
+  margin-left: 0;
+  margin-right: 0;
+  padding: 1em;
+  display: flex;
+  flex-direction: row;
+}

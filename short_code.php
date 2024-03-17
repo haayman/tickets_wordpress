@@ -1,8 +1,8 @@
 <?php
-// add_action('wp_enqueue_scripts', function () {
-//     wp_enqueue_style('foto_album', plugin_dir_url(__FILE__)  . 'foto_album.css');
-//     wp_enqueue_script('foto_album', plugin_dir_url(__FILE__)  . 'slideshow.js', ['jquery']);
-// });
+add_action('wp_enqueue_scripts', function () {
+    wp_enqueue_style('kaarten', plugin_dir_url(__FILE__)  . 'kaarten.css');
+    // wp_enqueue_script('foto_album', plugin_dir_url(__FILE__)  . 'slideshow.js', ['jquery']);
+});
 
 
 function kaarten_shortcode($atts) {
@@ -54,12 +54,12 @@ function displayKaarten($domain, $id) {
 
  
   ob_start(); ?>
-<div class=card">
-  <div class=row">
+<div class="card kaarten">
+  <div class="row">
     <label>Locatie</label>
     <div><?php echo $voorstelling->locatie?></div>
   </div>
-  <div class=row">
+  <div class="row">
     <label>Prij<?php echo count($voorstelling->prijzen) > 1  ? "zen" : "s" ?></label>
     <div class="d-flex flex-column">
       <?php foreach ($voorstelling->prijzen as $prijs) { 
@@ -70,14 +70,14 @@ function displayKaarten($domain, $id) {
     </div>
   </div>
   <?php if ($voorstelling->opmerkingen) { ?>
-  <div class=row">
+  <div class="row">
     <label>Opmerkingen</label>
     <div><?php echo $voorstelling->opmerkingen?></div>
   </div>
   <?php } ?>
 
   <?php if ($displayWachtrij) { ?>
-  <div class=row">
+  <div class="row">
     <label>Wachtlijst</label>
     <div>
       Aarzel niet om een plaats op de wachtlijst te nemen. <br />
@@ -87,7 +87,7 @@ function displayKaarten($domain, $id) {
   </div>
 
   <?php } ?>
-  <div class=row">
+  <div class="row">
     <table class="table ml-0">
       <thead>
         <tr>
@@ -119,12 +119,13 @@ function displayKaarten($domain, $id) {
       </tbody>
     </table>
   </div>
-  <div class=row">
+  <div class="row">
     <a href="<?php echo $domain?>/voorstelling/<?php echo $voorstelling->id?>" class="btn btn-primary">Reserveren
     </a>
   </div>
+</div>
 
-  <?php
+<?php
     $html = ob_get_contents();
     ob_end_clean();
 
