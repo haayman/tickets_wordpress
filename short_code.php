@@ -1,7 +1,7 @@
 <?php
 add_action('wp_enqueue_scripts', function () {
     wp_enqueue_style('kaarten', plugin_dir_url(__FILE__)  . 'kaarten.css');
-    // wp_enqueue_script('foto_album', plugin_dir_url(__FILE__)  . 'slideshow.js', ['jquery']);
+    wp_enqueue_script('kaarten', plugin_dir_url(__FILE__)  . 'kaarten.js', ['jquery']);
 });
 
 
@@ -17,7 +17,19 @@ function kaarten_shortcode($atts) {
     $domain = $args['domain'];
     $id = $args['id'];
 
-    return displayKaarten($domain, $id);
+    $script = <<<EOT
+<script>
+{
+  const retval = loadKaarten(jQuery, '{$domain}', '{$id}');
+
+  setInterval(function() {
+    loadKaarten(jQuery, '{$domain}', '{$id}');
+  }, 10*1000);
+}
+</script>
+EOT;
+
+    return kaartenDiv($domain, $id) . $script;
 }
 
 function array_any(array $array, callable $fn) {
@@ -30,7 +42,7 @@ function array_any(array $array, callable $fn) {
 }
 
 
-function displayKaarten($domain, $id) {
+function kaartenDiv($domain, $id) {
 
   $timezone = new DateTimeZone('Europe/Amsterdam');
 
@@ -53,17 +65,16 @@ function displayKaarten($domain, $id) {
     return $uitvoering->vrije_plaatsen <= 2;
   });
 
-
  
   ob_start(); ?>
-<div class="card kaarten">
+<div class="card kaarten" id="kaarten_<?php echo $id ?>">
   <div class="row">
     <label>Locatie</label>
     <div><?php echo $voorstelling->locatie?></div>
   </div>
   <div class="row">
     <label>Prij<?php echo count($voorstelling->prijzen) > 1  ? "zen" : "s" ?></label>
-    <div class="d-flex flex-column">
+    <div style="display: flex; flex-direction: column; flex-wrap: wrap;">
       <?php foreach ($voorstelling->prijzen as $prijs) { 
         if( $prijs->role == null ) { ?>
       <span><?php echo $prijs->description . " € " .  number_format($prijs->prijs, 2, ",", ".") ?></span>
@@ -142,3 +153,19 @@ function fetchVoorstelling($url) {
   
   return $data;
 }
+
+$ajax = function () {
+  $domain = $_GET['domain'];
+  $id = $_GET['id'];
+    try {
+      $html = kaartenDiv($domain, $id);
+      echo $html;
+      wp_die(); // prevent '0' in output
+    } catch (Exception $e) {
+        header('', true, 500);
+        echo $e->getMessage();
+    }
+};
+
+add_action('wp_ajax_kaarten', $ajax);
+add_action('wp_ajax_nopriv_kaarten', $ajax);
