@@ -19,8 +19,8 @@ function kaarten_shortcode($atts) {
 
     $script = <<<EOT
 <script>
-{
-  const retval = loadKaarten(jQuery, '{$domain}', '{$id}');
+
+  loadKaarten(jQuery, '{$domain}', '{$id}');
 
   setInterval(function() {
     loadKaarten(jQuery, '{$domain}', '{$id}');
