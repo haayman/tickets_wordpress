@@ -24,8 +24,7 @@ function kaarten_shortcode($atts) {
 
   setInterval(function() {
     loadKaarten(jQuery, '{$domain}', '{$id}');
-  }, 10*1000);
-}
+  }, 10*60*1000);
 </script>
 EOT;
 
