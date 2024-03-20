@@ -20,12 +20,14 @@ function kaarten_shortcode($atts)
 
   $script = <<<EOT
 <script>
+jQuery(document).ready(function($) {
 
-  loadKaarten(jQuery, '{$domain}', '{$id}');
+  loadKaarten($, '{$domain}', '{$id}');
 
   setInterval(function() {
-    loadKaarten(jQuery, '{$domain}', '{$id}');
+    loadKaarten($, '{$domain}', '{$id}');
   }, 10*60*1000);
+});
 </script>
 EOT;
 
