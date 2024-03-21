@@ -7,7 +7,7 @@ async function loadKaarten($, domain, id) {
       )}&id=${id}`
     );
     const html = await response.text();
-    elem.replace(html);
+    $(elem).replaceWith(html);
   } catch (e) {
     console.log(e);
   }
