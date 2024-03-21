@@ -140,7 +140,7 @@ function kaartenDiv($domain, $id)
         </table>
       </div>
       <div class="row">
-        <a href="<?php echo $domain ?>/voorstelling/<?php echo $voorstelling->id ?>" class="btn btn-primary">Reserveren
+        <a href="<?php echo $domain ?>/voorstelling/<?php echo $voorstelling->id ?>" class="btn btn-primary">Bestellen
         </a>
       </div>
     </div>
