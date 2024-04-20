@@ -1,5 +1,8 @@
-async function loadKaarten($, domain, id) {
-  const elem = $(`#kaarten_${id}`);
+async function loadKaarten($, domain, id, domId) {
+  if (!domId) {
+    domId = `#kaarten-${id}`;
+  }
+  const elem = $(domId);
   try {
     const response = await fetch(
       `/wp-admin/admin-ajax.php?action=kaarten&domain=${encodeURIComponent(

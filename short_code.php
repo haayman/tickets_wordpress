@@ -18,7 +18,9 @@ function kaarten_shortcode($atts)
   $domain = $args['domain'];
   $id = $args['id'];
 
-  $script = <<<EOT
+  if ($id) {
+
+    $script = <<<EOT
 <script>
 jQuery(document).ready(function($) {
 
@@ -31,7 +33,12 @@ jQuery(document).ready(function($) {
 </script>
 EOT;
 
-  return kaartenDiv($domain, $id) . $script;
+
+
+    return kaartenDiv($domain, $id) . $script;
+  } else {
+    return kaartenList($domain);
+  }
 }
 
 function array_any(array $array, callable $fn)
@@ -42,6 +49,44 @@ function array_any(array $array, callable $fn)
     }
   }
   return false;
+}
+
+
+
+function kaartenList($domain)
+{
+  $url = $domain . "/api/voorstelling";
+  $voorstellingen = fetchVoorstelling($url);
+  if (!$voorstellingen || count($voorstellingen) == 0) {
+    return "<div class='alert alert-danger'>Er zijn momenteel geen voorstellingen</div>";
+  } else if (count($voorstellingen) == 1) {
+    return kaartenDiv($domain, $voorstellingen[0]->id);
+  }
+
+  $ids = array_map(function ($voorstelling) {
+    return $voorstelling->id;
+  }, $voorstellingen);
+  ob_start(); ?>
+<div class="card kaarten" id="kaarten-list">
+  <div class="row">
+    Kies een voorstelling
+  </div>
+  <div class="row">
+    <?php foreach ($voorstellingen as $voorstelling) { ?>
+    <a class="col btn"
+      onclick="loadKaarten(jQuery, '<?php echo $domain ?>', <?php echo $voorstelling->id ?>, '#kaarten-list')">
+      <img src="<?php echo $voorstelling->thumbnail ?>" height="100"><br />
+      <?php echo $voorstelling->title ?>
+    </a>
+    <?php } ?>
+  </div>
+</div>
+<?php
+
+  $html = ob_get_contents();
+  ob_end_clean();
+
+  return $html;
 }
 
 
@@ -68,82 +113,81 @@ function kaartenDiv($domain, $id)
     $voorstelling->uitvoeringen = array_filter($voorstelling->uitvoeringen, function ($uitvoering) {
       return strtotime($uitvoering->aanvang) >= strtotime(date('Y-m-d'));
     });
-    //  var_dump($voorstelling);
+    // var_dump($voorstelling);
     $displayWachtrij = array_any($voorstelling->uitvoeringen, function ($uitvoering) {
       return $uitvoering->vrije_plaatsen <= 2;
     });
-
-
     ob_start(); ?>
-    <div class="card kaarten" id="kaarten_<?php echo $id ?>">
-      <div class="row">
-        <label>Locatie</label>
-        <div><?php echo $voorstelling->locatie ?></div>
-      </div>
-      <div class="row">
-        <label>Prij<?php echo count($voorstelling->prijzen) > 1  ? "zen" : "s" ?></label>
-        <div style="display: flex; flex-direction: column; flex-wrap: wrap;">
-          <?php foreach ($voorstelling->prijzen as $prijs) {
+<div class="card kaarten" id="kaarten_<?php echo $id ?>">
+  <div class="row">
+    <label>Locatie</label>
+    <div><?php echo $voorstelling->locatie ?></div>
+  </div>
+  <div class="row">
+    <label>Prij<?php echo count($voorstelling->prijzen) > 1  ? "zen" : "s" ?></label>
+    <div style="display: flex; flex-direction: column; flex-wrap: wrap;">
+      <?php foreach ($voorstelling->prijzen as $prijs) {
             if ($prijs->role == null) { ?>
-              <span><?php echo $prijs->description . " € " .  number_format($prijs->prijs, 2, ",", ".") ?></span>
-          <?php }
+      <span><?php echo $prijs->description . " € " .  number_format($prijs->prijs, 2, ",", ".") ?></span>
+      <?php }
           } ?>
-        </div>
-      </div>
-      <?php if ($voorstelling->opmerkingen) { ?>
-        <div class="row">
-          <label>Opmerkingen</label>
-          <div><?php echo $voorstelling->opmerkingen ?></div>
-        </div>
-      <?php } ?>
+    </div>
+  </div>
+  <?php if ($voorstelling->opmerkingen) { ?>
+  <div class="row">
+    <label>Opmerkingen</label>
+    <div><?php echo $voorstelling->opmerkingen ?></div>
+  </div>
+  <?php } ?>
 
-      <?php if ($displayWachtrij) { ?>
-        <div class="row">
-          <label>Wachtlijst</label>
-          <div>
-            Aarzel niet om een plaats op de wachtlijst te nemen. <br />
-            De ervaring leert dat er op het laatst nog veel plaatsen vrij kunnen
-            komen
-          </div>
-        </div>
+  <?php if ($displayWachtrij) { ?>
+  <div class="row">
+    <label>Wachtlijst</label>
+    <div>
+      Aarzel niet om een plaats op de wachtlijst te nemen. <br />
+      De ervaring leert dat er op het laatst nog veel plaatsen vrij kunnen
+      komen
+    </div>
+  </div>
 
-      <?php } ?>
-      <div class="row">
-        <table class="table ml-0">
-          <thead>
-            <tr>
-              <th>datum</th>
-              <th></th>
-              <th>aanvang</th>
-              <th>ontvangst</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($voorstelling->uitvoeringen as $uitvoering) {
+  <?php } ?>
+  <div class="row">
+    <table class="table ml-0">
+      <thead>
+        <tr>
+          <th>datum</th>
+          <th></th>
+          <th>aanvang</th>
+          <th>ontvangst</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <?php foreach ($voorstelling->uitvoeringen as $uitvoering) {
               $aanvang = date_create($uitvoering->aanvang,  $timezone);
               $deur_open = date_create($uitvoering->deur_open, $timezone);
             ?>
-              <tr>
-                <td>
-                  <a href="<?php echo $domain ?>/voorstelling/<?php echo $voorstelling->id ?>/?uitvoering_id=<?php echo $uitvoering->id ?>">
-                    <?php echo $dateFtm->format($aanvang) ?>
-                  </a>
-                </td>
-                <td><?php echo $uitvoering->extra_text ?></td>
-                <td><?php echo $timeFtm->format($aanvang) ?></td>
-                <td><?php echo $timeFtm->format($deur_open) ?></td>
-                <td><?php echo $uitvoering->status ?></td>
-              </tr>
-            <?php } ?>
-          </tbody>
-        </table>
-      </div>
-      <div class="row">
-        <a href="<?php echo $domain ?>/voorstelling/<?php echo $voorstelling->id ?>" class="btn btn-primary">Bestellen
-        </a>
-      </div>
-    </div>
+        <tr>
+          <td>
+            <a
+              href="<?php echo $domain ?>/voorstelling/<?php echo $voorstelling->id ?>/?uitvoering_id=<?php echo $uitvoering->id ?>">
+              <?php echo $dateFtm->format($aanvang) ?>
+            </a>
+          </td>
+          <td><?php echo $uitvoering->extra_text ?></td>
+          <td><?php echo $timeFtm->format($aanvang) ?></td>
+          <td><?php echo $timeFtm->format($deur_open) ?></td>
+          <td><?php echo $uitvoering->status ?></td>
+        </tr>
+        <?php } ?>
+      </tbody>
+    </table>
+  </div>
+  <div class="row">
+    <a href="<?php echo $domain ?>/voorstelling/<?php echo $voorstelling->id ?>" class="btn btn-primary">Bestellen
+    </a>
+  </div>
+</div>
 
 <?php
     $html = ob_get_contents();
