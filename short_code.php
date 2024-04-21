@@ -99,7 +99,7 @@ function kaartenDiv($options)
 {
   $domain = $options['domain'];
   $id = $options['id'];
-  $back = $options['back'];
+  $back = isset($options['back']) ? $options['back'] : false;
   $domId = $options['domId'];
 
   $url = $domain . "/api/voorstelling/" . $id;
