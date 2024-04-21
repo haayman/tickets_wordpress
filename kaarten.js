@@ -1,13 +1,14 @@
-async function loadKaarten($, domain, id, domId) {
-  if (!domId) {
-    domId = `#kaarten-${id}`;
-  }
-  const elem = $(domId);
+async function loadKaarten($, options) {
+  let { domId } = options;
+  const elem = $(`#${domId}`);
+  const params = {
+    action: "kaarten",
+    ...options,
+  };
+  const searchParams = new URLSearchParams(params);
   try {
     const response = await fetch(
-      `/wp-admin/admin-ajax.php?action=kaarten&domain=${encodeURIComponent(
-        domain
-      )}&id=${id}`
+      `/wp-admin/admin-ajax.php?${searchParams.toString()}`
     );
     const html = await response.text();
     $(elem).replaceWith(html);

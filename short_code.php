@@ -4,9 +4,12 @@ add_action('wp_enqueue_scripts', function () {
   wp_enqueue_script('kaarten', plugin_dir_url(__FILE__)  . 'kaarten.js', ['jquery']);
 });
 
+$domIdCounter = 0;
+
 
 function kaarten_shortcode($atts)
 {
+  global $domIdCounter;
 
   $options['domain'] = isset($options['domain']) ? $options['domain'] : "";
   $options['id'] = isset($options['id']) ? $options['id'] : "";
@@ -17,27 +20,26 @@ function kaarten_shortcode($atts)
 
   $domain = $args['domain'];
   $id = $args['id'];
+  $domId = "kaarten-" . ++$domIdCounter;
+  $back = !$id;
 
-  if ($id) {
 
-    $script = <<<EOT
+  $script = <<<EOT
 <script>
 jQuery(document).ready(function($) {
 
-  loadKaarten($, '{$domain}', '{$id}');
+  loadKaarten($, {domain:'{$domain}', id:'{$id}', domId:'{$domId}', back:'{$back}'});
 
-  setInterval(function() {
-    loadKaarten($, '{$domain}', '{$id}');
-  }, 10*60*1000);
 });
 </script>
 EOT;
 
 
+  if ($id) {
 
-    return kaartenDiv($domain, $id) . $script;
+    return kaartenDiv(['domain' => $domain, 'id' => $id, 'domId' => $domId]) . $script;
   } else {
-    return kaartenList($domain);
+    return kaartenList(['domain' => $domain, 'domId' => $domId]);
   }
 }
 
@@ -53,8 +55,11 @@ function array_any(array $array, callable $fn)
 
 
 
-function kaartenList($domain)
+function kaartenList($options)
 {
+  $domain = $options['domain'];
+  $domId = $options['domId'];
+
   $url = $domain . "/api/voorstelling";
   $voorstellingen = fetchVoorstelling($url);
   if (!$voorstellingen || count($voorstellingen) == 0) {
@@ -67,14 +72,14 @@ function kaartenList($domain)
     return $voorstelling->id;
   }, $voorstellingen);
   ob_start(); ?>
-<div class="card kaarten" id="kaarten-list">
+<div class="card kaarten" id="<?php echo $domId ?>">
   <div class="row">
     Kies een voorstelling
   </div>
   <div class="row">
     <?php foreach ($voorstellingen as $voorstelling) { ?>
     <a class="col btn"
-      onclick="loadKaarten(jQuery, '<?php echo $domain ?>', <?php echo $voorstelling->id ?>, '#kaarten-list')">
+      onclick="loadKaarten(jQuery, {domain:'<?php echo $domain ?>', id: <?php echo $voorstelling->id ?>, domId:'<?php echo $domId ?>', 'back':true})">
       <img src="<?php echo $voorstelling->thumbnail ?>" height="100"><br />
       <?php echo $voorstelling->title ?>
     </a>
@@ -90,8 +95,14 @@ function kaartenList($domain)
 }
 
 
-function kaartenDiv($domain, $id)
+function kaartenDiv($options)
 {
+  $domain = $options['domain'];
+  $id = $options['id'];
+  $back = $options['back'];
+  $domId = $options['domId'];
+
+  $url = $domain . "/api/voorstelling/" . $id;
   try {
 
     $timezone = new DateTimeZone('Europe/Amsterdam');
@@ -118,7 +129,7 @@ function kaartenDiv($domain, $id)
       return $uitvoering->vrije_plaatsen <= 2;
     });
     ob_start(); ?>
-<div class="card kaarten" id="kaarten_<?php echo $id ?>">
+<div class="card kaarten" id="<?php echo $domId ?>">
   <div class="row">
     <label>Locatie</label>
     <div><?php echo $voorstelling->locatie ?></div>
@@ -184,7 +195,15 @@ function kaartenDiv($domain, $id)
     </table>
   </div>
   <div class="row">
-    <a href="<?php echo $domain ?>/voorstelling/<?php echo $voorstelling->id ?>" class="btn btn-primary">Bestellen
+    <div class="col">
+      <a href="<?php echo $domain ?>/voorstelling/<?php echo $voorstelling->id ?>" class="btn btn-primary">Bestellen</a>
+    </div>
+    <?php if ($back) { ?>
+    <div class="col">
+      <a class="btn"
+        onclick="loadKaarten(jQuery, {domain:'<?php echo $domain ?>', domId:'<?php echo $domId ?>'})">Terug</a>
+    </div>
+    <?php } ?>
     </a>
   </div>
 </div>
@@ -217,11 +236,18 @@ function fetchVoorstelling($url)
 $ajax = function () {
   $domain = $_GET['domain'];
   $id = $_GET['id'];
+  $domId = $_GET['domId'];
+  $back = $_GET['back'];
   try {
-    $html = kaartenDiv($domain, $id);
+    if (!$id) {
+      $html = kaartenList(['domain' => $domain, 'domId' => $domId]);
+    } else {
+      $html = kaartenDiv(['domain' => $domain, 'id' => $id, 'domId' => $domId, 'back' => $back]);
+    }
     echo $html;
     wp_die(); // prevent '0' in output
   } catch (Exception $e) {
+    var_dump($e);
     header('', true, 500);
     echo $e->getMessage();
   }
