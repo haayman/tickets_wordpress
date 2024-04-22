@@ -79,7 +79,7 @@ function kaartenList($options)
   <div class="row">
     <?php foreach ($voorstellingen as $voorstelling) { ?>
     <a class="col btn"
-      onclick="loadKaarten(jQuery, {domain:'<?php echo $domain ?>', id: <?php echo $voorstelling->id ?>, domId:'<?php echo $domId ?>', 'back':true})">
+      onclick="loadKaarten(jQuery, {domain:'<?php echo $domain ?>', id: <?php echo $voorstelling->id ?>, domId:'<?php echo $domId ?>', back:true})">
       <img src="<?php echo $voorstelling->thumbnail ?>" height="100"><br />
       <?php echo $voorstelling->title ?>
     </a>
