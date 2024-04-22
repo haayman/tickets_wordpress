@@ -79,7 +79,7 @@ function kaartenList($options)
   <div class="row">
     <?php foreach ($voorstellingen as $voorstelling) { ?>
     <a class="col btn"
-      onclick="loadKaarten(jQuery, {domain:'<?php echo $domain ?>', id: <?php echo $voorstelling->id ?>, domId:'<?php echo $domId ?>', back:true})">
+      onclick="loadKaarten(jQuery, {domain:'<?php echo $domain ?>', id: <?php echo $voorstelling->id ?>, domId:'<?php echo $domId ?>', back:true, loader: true})">
       <img src="<?php echo $voorstelling->thumbnail ?>" height="100"><br />
       <?php echo $voorstelling->title ?>
     </a>
@@ -201,7 +201,7 @@ function kaartenDiv($options)
     <?php if ($back) { ?>
     <div class="col">
       <a class="btn"
-        onclick="loadKaarten(jQuery, {domain:'<?php echo $domain ?>', domId:'<?php echo $domId ?>'})">Terug</a>
+        onclick="loadKaarten(jQuery, {domain:'<?php echo $domain ?>', domId:'<?php echo $domId ?>', loader:true})">Terug</a>
     </div>
     <?php } ?>
     </a>
@@ -238,6 +238,7 @@ $ajax = function () {
   $id = $_GET['id'];
   $domId = $_GET['domId'];
   $back = $_GET['back'];
+  $loader = $_GET['loader'];
   try {
     if (!$id) {
       $html = kaartenList(['domain' => $domain, 'domId' => $domId]);
