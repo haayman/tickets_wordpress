@@ -5,6 +5,9 @@ async function loadKaarten($, options) {
     action: "kaarten",
     ...options,
   };
+  $(elem).append(
+    '<div class="overlay"><i class="fas fa-spinner fa-spin" style="font-size: 4em; margin:1em;"></i></div>'
+  );
   const searchParams = new URLSearchParams(params);
   try {
     const response = await fetch(
