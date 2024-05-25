@@ -65,7 +65,7 @@ function kaartenList($options)
   if (!$voorstellingen || count($voorstellingen) == 0) {
     return "<div class='alert alert-danger'>Er zijn momenteel geen voorstellingen</div>";
   } else if (count($voorstellingen) == 1) {
-    return kaartenDiv($domain, $voorstellingen[0]->id);
+    return kaartenDiv(['domain' => $domain, 'id' => $voorstellingen[0]->id]);
   }
 
   $ids = array_map(function ($voorstelling) {
@@ -97,10 +97,11 @@ function kaartenList($options)
 
 function kaartenDiv($options)
 {
+  // var_dump($options);
   $domain = $options['domain'];
   $id = $options['id'];
   $back = isset($options['back']) ? $options['back'] : false;
-  $domId = $options['domId'];
+  $domId = isset($options['domId']) ? $options['domId'] : NULL;
 
   $url = $domain . "/api/voorstelling/" . $id;
   try {
