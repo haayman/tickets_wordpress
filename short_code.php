@@ -205,7 +205,6 @@ function kaartenDiv($options)
         onclick="loadKaarten(jQuery, {domain:'<?php echo $domain ?>', domId:'<?php echo $domId ?>', loader:true})">Terug</a>
     </div>
     <?php } ?>
-    </a>
   </div>
 </div>
 
